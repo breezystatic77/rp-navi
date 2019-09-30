@@ -1,0 +1,36 @@
+extends ../layout
+
+block content
+    h2 Account administration
+    form.form-style(action="/findUser", method="post")
+        fieldset
+            legend Find user name
+            label(for="username") Username
+            input.common-input(type="text", name="username", placeholder="Username")
+            input(type="submit", value="Request")
+    p #{message}
+
+    div(style="display: " + hideShow)
+        h2 Account: #{username}
+
+        form.form-style(action="/changeEmail", method="post")
+            fieldset
+                legend Change Email
+                p Current email: #{email}
+                input.common-input(type="email", name="email", placeholder="Email address")
+                button(type="submit") Update
+        br
+        form.form-style(action="/forgotPassword", method="post")
+            fieldset
+                legend Reset PW
+                button(type="submit") Generate reset
+        br
+        form.form-style(action="/setAcctState", method="post")
+            fieldset
+                legend Set account state
+                p State: #{acctState}
+                br
+                button(type="submit", name="newAcctState", value="Disable") Disable
+                button(type="submit", name="newAcctState", value="Suspend") Suspend
+                button(type="submit", name="newAcctState", value="Ghost") Ghost
+                button(type="submit", name="newAcctState", value="Active") Active

@@ -1,0 +1,29 @@
+extends ../layout
+
+block content
+    h1 Welcome #{username}
+    p #{verifyMessage}
+    p #{statusMessage}
+
+    form.form-style(action="/user/changeEmail", method="post")
+        fieldset
+            legend Change Email
+            p Current email: #{email}
+            input.common-input(type="email", name="email", placeholder="Email address")
+            button Update
+    br
+    form.form-style(action="/user/changePassword", method="post")
+        fieldset
+            legend Change Password
+            input.common-input(type="password", name="oldPassword", placeholder="Current Password")
+            input.common-input(type="password", name="newPassword", placeholder="New Password")
+            button Update
+    br
+    form.form-style(action="/user/disableAccount", method="post")
+        fieldset
+            legend Disable account
+            input.common-input(type="password", name="currentPassword", placeholder="Password")
+            button Disable
+    br
+    form(action="/logout", method="post")
+        button Logout

@@ -1,0 +1,11 @@
+extends ../layout
+
+block content
+    h2 Account administration
+    form.form-style(action="/admin/findUser", method="post")
+    fieldset
+        legend Find user name
+        label(for="username") Username
+        input.common-input(type="text", name="username", placeholder="Username")
+        input(type="submit", value="Request")
+    p #{message}
