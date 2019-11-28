@@ -1,11 +1,11 @@
-const accountsDb    = require('../models/accounts')
-const logger        = require('../utils/utils').logger
-const environment   = require('../utils/utils').getEnvironment()
-const chatHandlers  = require('./chat-socket-handlers').setConnectionHanlders
+const accountsDb = require('../models/accounts')
+const logger = require('../utils/utils').logger
+const environment = require('../utils/utils').getEnvironment()
+const chatHandlers = require('./chat-socket-handlers').setConnectionHanlders
 const setChatServer = require('./chat-socket-handlers').setIoServer
 var server
 
-function setServer(io){
+function setServer(io) {
 	server = io
 
 	setChatServer(io)
@@ -24,12 +24,12 @@ function setPmHandlers(socket) {
 		logger.info('Someone tried to access the PM system without a login session')
 		return
 	}
-	logger.info(`${username} connected to the PM Socket`);
-	
+	logger.info(`${username} connected to the PM Socket`)
+
 	socket.join(username)
-	socket.on('pm message', (data) => {
+	socket.on('pm message', data => {
 		logger.info('%s', JSON.stringify(data, undefined, 4))
-		socket.to(data.to).emit('pm message', {from: username, msg: data.msg})
+		socket.to(data.to).emit('pm message', { from: username, msg: data.msg })
 	})
 }
 

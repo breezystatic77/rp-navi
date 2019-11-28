@@ -1,12 +1,12 @@
-const accountsDb    = require('../models/accounts')
-const accountStates  = require('../models/account-schema').accountStates
-const ENVIRONMENT   = require('../utils/utils').getEnvironment()
-const logger        = require('../utils/utils').logger
-const SUCCESS       = require('../utils/reason-codes').genericCodes.SUCCESS
-const FAILURE       = require('../utils/reason-codes').genericCodes.FAILURE
+const accountsDb = require('../models/accounts')
+const accountStates = require('../models/account-schema').accountStates
+const ENVIRONMENT = require('../utils/utils').getEnvironment()
+const logger = require('../utils/utils').logger
+const SUCCESS = require('../utils/reason-codes').genericCodes.SUCCESS
+const FAILURE = require('../utils/reason-codes').genericCodes.FAILURE
 
 function sendError(error) {
-	let status = {status: error}
+	let status = { status: error }
 	logger.error('Could not complete the request ', error)
 	return status
 }
@@ -17,44 +17,47 @@ function signup(req, res) {
 	const email = req.body.email
 
 	let createPromise = accountsDb.createAccount(username, password, email)
-	return createPromise.then((response) => {
-		let status = {status: response.status, data: response.account}
-		req.session.account = response.account._id
-		req.session.username = response.account.username
-		res.cookie(process.env.COOKIE_NAME, 'value', {username: response.account.username})
-		if (ENVIRONMENT === 'debug') {
-			status.verification_key = response.account.verifyKey
-		}
-		return status
-	})
-	.catch(sendError)
+	return createPromise
+		.then(response => {
+			let status = { status: response.status, data: response.account }
+			req.session.account = response.account._id
+			req.session.username = response.account.username
+			res.cookie(process.env.COOKIE_NAME, 'value', {
+				username: response.account.username
+			})
+			if (ENVIRONMENT === 'debug') {
+				status.verification_key = response.account.verifyKey
+			}
+			return status
+		})
+		.catch(sendError)
 }
 
 function login(req, res) {
 	const username = req.body.username
 	const password = req.body.password
 	let loginPromise = accountsDb.verifyPassword(username, password)
-	
-	return loginPromise.then((response) => {
-		if (response.status === SUCCESS) {
-			let status = {status: SUCCESS}
-			if (response.account.state < accountStates.ghosted) {
-				status.status = FAILURE
-			}
-			else {
-				req.session.account = response.account._id
-				req.session.username = response.account.username
-				res.cookie(process.env.COOKIE_NAME, 'value', {username: response.account.username})
-				status.data = response.account
-			}
-			return status
-		}
-		else {
-			return {status: FAILURE}
-		}
 
-	})
-	.catch(sendError)
+	return loginPromise
+		.then(response => {
+			if (response.status === SUCCESS) {
+				let status = { status: SUCCESS }
+				if (response.account.state < accountStates.ghosted) {
+					status.status = FAILURE
+				} else {
+					req.session.account = response.account._id
+					req.session.username = response.account.username
+					res.cookie(process.env.COOKIE_NAME, 'value', {
+						username: response.account.username
+					})
+					status.data = response.account
+				}
+				return status
+			} else {
+				return { status: FAILURE }
+			}
+		})
+		.catch(sendError)
 }
 
 function getAccountData(req, res) {
@@ -66,10 +69,11 @@ function getAccountData(req, res) {
 	console.log(req.cookies)
 
 	let readPromise = accountsDb.getAccountData(username, [])
-	return readPromise.then((response) => {
-		return response
-	})
-	.catch(sendError)
+	return readPromise
+		.then(response => {
+			return response
+		})
+		.catch(sendError)
 }
 
 function searchAccountData(req, res) {
@@ -78,12 +82,13 @@ function searchAccountData(req, res) {
 	if (req.body.username) {
 		username = req.body.username
 	}
-	
+
 	let readPromise = accountsDb.getAccountData(username, [])
-	return readPromise.then((response) => {
-		return response
-	})
-	.catch(sendError)
+	return readPromise
+		.then(response => {
+			return response
+		})
+		.catch(sendError)
 }
 
 function verifyAccount(req, res) {
@@ -91,13 +96,13 @@ function verifyAccount(req, res) {
 		const username = req.query.username
 		const verifyKey = req.query.verifyKey
 		let verifyPromise = accountsDb.verifyAccount(username, verifyKey)
-		return verifyPromise.then((response) => {
-			return response
-		})
-		.catch(sendError)
-	}
-	else {
-		return Promise.reject({status: FAILURE})
+		return verifyPromise
+			.then(response => {
+				return response
+			})
+			.catch(sendError)
+	} else {
+		return Promise.reject({ status: FAILURE })
 	}
 }
 
@@ -106,10 +111,11 @@ function updateEmail(req, res) {
 	const email = req.body.email
 	let updatePromise = accountsDb.updateEmail(username, email)
 
-	return updatePromise.then((response) => {
-		return response
-	})
-	.catch(sendError)
+	return updatePromise
+		.then(response => {
+			return response
+		})
+		.catch(sendError)
 }
 
 function updatePassword(req, res) {
@@ -117,20 +123,20 @@ function updatePassword(req, res) {
 	const currentPass = req.body.oldPassword
 	const newPass = req.body.newPassword
 	let loginPromise = accountsDb.verifyPassword(username, currentPass)
-	let updatePromise = accountsDb.updatePassword(newPass, usernamer=username)
+	let updatePromise = accountsDb.updatePassword(newPass, (usernamer = username))
 
-	return loginPromise.then((response) => {
-		if (response.status === SUCCESS) {
-			return updatePromise
-		}
-		else {
-			return {status: FAILURE}
-		}
-	})
-	.then((response) => {
-		return response
-	})
-	.catch(sendError)
+	return loginPromise
+		.then(response => {
+			if (response.status === SUCCESS) {
+				return updatePromise
+			} else {
+				return { status: FAILURE }
+			}
+		})
+		.then(response => {
+			return response
+		})
+		.catch(sendError)
 }
 
 function requestPwReset(req, res) {
@@ -138,30 +144,36 @@ function requestPwReset(req, res) {
 	let requestPromise = accountsDb.requestPwReset(username)
 
 	logger.info('A password reset has been requested for %s', username)
-	return requestPromise.then((response) => {
-		return response
-	})
-	.catch(sendError)
+	return requestPromise
+		.then(response => {
+			return response
+		})
+		.catch(sendError)
 }
 
-function verifyPasswordReset (req, res) {
+function verifyPasswordReset(req, res) {
 	const resetKey = req.query.key
 	let verifyPromise = accountsDb.verifyPasswordReset(resetKey)
 
-	return verifyPromise.then((response) => {
-		return response
-	})
-	.catch(sendError)
+	return verifyPromise
+		.then(response => {
+			return response
+		})
+		.catch(sendError)
 }
 
 function resetPassword(req, res) {
 	const newPass = req.body.newPassword
 
-	let updatePromise = accountsDb.updatePassword(newPass, resetKey=req.query.key)
-	return updatePromise.then((response) => {
-		return response
-	})
-	.catch(sendError)
+	let updatePromise = accountsDb.updatePassword(
+		newPass,
+		(resetKey = req.query.key)
+	)
+	return updatePromise
+		.then(response => {
+			return response
+		})
+		.catch(sendError)
 }
 
 function disableAccount(req, res) {
@@ -170,18 +182,18 @@ function disableAccount(req, res) {
 	let loginPromise = accountsDb.verifyPassword(username, password)
 	let disablePromise = accountsDb.deactivateAccount(username)
 
-	return loginPromise.then((response) => {
-		if (response.status === SUCCESS) {
-			return disablePromise
-		}
-		else {
-			return {status: FAILURE}
-		}
-	})
-	.then((response) => {
-		return response
-	})
-	.catch(sendError)
+	return loginPromise
+		.then(response => {
+			if (response.status === SUCCESS) {
+				return disablePromise
+			} else {
+				return { status: FAILURE }
+			}
+		})
+		.then(response => {
+			return response
+		})
+		.catch(sendError)
 }
 
 /* Admin Functions ***********************************************************/
@@ -205,11 +217,16 @@ function updateAccountState(req, res) {
 	}
 	let updatePromise = accountsDb.updateAccountState(username, newState)
 
-	return updatePromise.then((response) => {
-		logger.debug('%s: %s', updateAccountState.name, JSON.stringify(response, undefined, 4))
-		return response
-	})
-	.catch(sendError)
+	return updatePromise
+		.then(response => {
+			logger.debug(
+				'%s: %s',
+				updateAccountState.name,
+				JSON.stringify(response, undefined, 4)
+			)
+			return response
+		})
+		.catch(sendError)
 }
 
 exports.signup = signup

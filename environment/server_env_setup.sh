@@ -1,5 +1,9 @@
 #!/bin/bash
 
+
+echo "DEPRECATED. use VS Code Dev Container instead!"
+exit 1
+
 echo Installing server environment...
 echo
 

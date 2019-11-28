@@ -1,14 +1,14 @@
 /**
  * @file Routes for developer mode on the normal app
  */
-var express = require('express');
-var router = express.Router();
+var express = require('express')
+var router = express.Router()
 
 const accountCtrl = require('../controllers/accounts')
 const logger = require('../utils/utils').logger
 
 /* GET home page. */
-router.get('/user_links', getKeys);
+router.get('/user_links', getKeys)
 
 async function getKeys(req, res) {
 	try {
@@ -29,12 +29,11 @@ async function getKeys(req, res) {
 		}
 		logger.debug('Account data: %s', JSON.stringify(accountData, undefined, 4))
 		res.render('./dev/user-links', accountData)
-	}
-	catch (error) {
+	} catch (error) {
 		logger.error('There was an error: ', error)
 		req.session = null
 		res.redirect('/')
 	}
 }
 
-module.exports = router;
+module.exports = router

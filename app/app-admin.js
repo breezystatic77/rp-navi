@@ -1,6 +1,8 @@
+/* Get environment settings **************************************************/
+require('dotenv-flow').config()
+
 /* Grab all dependencies *****************************************************/
 var createError = require('http-errors')
-var dotenv = require('dotenv')
 var express = require('express')
 var session = require('express-session')
 var cookieSession = require('cookie-session')
@@ -8,8 +10,7 @@ var path = require('path')
 var cookieParser = require('cookie-parser')
 var morgan = require('morgan')
 
-/* Get environment settings **************************************************/
-dotenv.config()
+
 
 /* Setup dependencies ********************************************************/
 const logger = require('./utils/utils').logger
