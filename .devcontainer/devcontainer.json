@@ -8,7 +8,8 @@
 	// Use 'settings' to set *default* container specific settings.json values on container create. 
 	// You can edit these settings after create using File > Preferences > Settings > Remote.
 	"settings": { 
-		"terminal.integrated.shell.linux": "/bin/bash"
+		"terminal.integrated.shell.linux": "/bin/bash",
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
 
 	// Uncomment the next line if you want start specific services in your Docker Compose config.
@@ -23,6 +24,10 @@
 
 	// Add the IDs of extensions you want installed when the container is created in the array below.
 	"extensions": [
-		"dbaeumer.vscode-eslint"
+		"dbaeumer.vscode-eslint",
+		"eamodio.gitlens",
+		"esbenp.prettier-vscode",
+		"gruntfuggly.todo-tree",
+		"mikestead.dotenv"
 	]
 }

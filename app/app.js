@@ -20,8 +20,15 @@ logger.info('Running server with environment %s', process.env.NODE_ENV)
 if (process.env.DB_TYPE === 'mongodb') {
 	const mongoose = require('mongoose')
 	mongoose.set('useCreateIndex', true)
-	mongoose.connect(process.env.DB_URL, {
-		useNewUrlParser: true
+	const connectionUrl = `mongodb://${process.env.DB_IP}:27017/rpn_db`
+	logger.info('attempting to connect to mongodb at ' + connectionUrl)
+	mongoose.connect(connectionUrl, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true
+	}).then(() => {
+		logger.info('connected to mongoDB')
+	}).catch((err) => {
+		logger.error('error connecting to mongodb:', err.message)
 	})
 	require('./models/account-schema.js')
 } else {
@@ -50,7 +57,7 @@ app.use(cookieParser())
 	},
 }))*/
 app.use(sessionMiddleware)
-app.use(morgan('combined', {
+app.use(morgan('short', {
 	stream: httpLogger.stream
 }))
 app.use(express.json())
