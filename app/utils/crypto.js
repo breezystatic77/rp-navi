@@ -5,9 +5,9 @@
 
 /**
  * Generates a random SHA256 hash using base 64 string (0-9, A-Z, a-z) as the
- * output. These are used for generate keys for verifying a request or to 
+ * output. These are used for generate keys for verifying a request or to
  * generate requests for others.
- * 
+ *
  * @returns {string} A base 64 string of the hash that was generated.
  */
 function generateKey() {
@@ -21,8 +21,8 @@ function generateKey() {
 
 /**
  * Generates a hash for password storage.
- * @param {*} password 
- * @param {*} salt 
+ * @param {*} password
+ * @param {*} salt
  * @returns A promise of some hashing function to be handled by the caller.
  */
 function getPasswordHash(password, salt) {

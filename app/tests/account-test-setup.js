@@ -10,14 +10,13 @@ require('../model/reset-pw-schema.js')
 const accountCtrl = require('../controller/accounts')
 const logger = require('../common/utils').logger
 
-
 let request = {
 	username: '',
 	password: '',
 	email: '',
 	session: {
 		id: 0,
-		destroy: function(){
+		destroy: function() {
 			logger.info('Destroying session')
 			request.session.id = 0
 		}

@@ -1,17 +1,17 @@
-const promisify = require('util').promisify;
-const accountsDb    = require('../models/accounts')
-const logger        = require('../utils/utils').logger
-const SUCCESS       = require('../utils/reason-codes').genericCodes.SUCCESS
+const promisify = require('util').promisify
+const accountsDb = require('../models/accounts')
+const logger = require('../utils/utils').logger
+const SUCCESS = require('../utils/reason-codes').genericCodes.SUCCESS
 
-const DEL_ACTION        = 0
-const ADD_ACTION        = 1
-const SYSTEM_ROOM_NAME  = 'system'
+const DEL_ACTION = 0
+const ADD_ACTION = 1
+const SYSTEM_ROOM_NAME = 'system'
 
 /* User roles */
-const USER_REMOVED      = -99
-const USER_STANDARD     = 0
-const USER_MOD          = 1
-const USER_OWNER        = 2
+const USER_REMOVED = -99
+const USER_STANDARD = 0
+const USER_MOD = 1
+const USER_OWNER = 2
 
 let server = null
 
@@ -36,7 +36,7 @@ let server = null
  * room ban user                A user was banned
  * room unban user              A user was unbanned
  * room settings updated        A mod updated the room options
- * 
+ *
  * -- From Client --
  * disconnect                   Client disconnected
  * chat message                 Client sent a message for a chat room
@@ -48,24 +48,24 @@ let server = null
  */
 
 /* Data Structures ***********************************************************/
-function MessageData (msg, username, room) {
+function MessageData(msg, username, room) {
 	this.msg = msg
 	this.username = username
 	this.roomName = room
 	this.timestamp = new Date().getTime()
 }
 
-function StatusData (msg) {
+function StatusData(msg) {
 	this.msg = msg
 	this.timestamp = new Date().getTime()
 }
 
-function UserData (name, role) {
+function UserData(name, role) {
 	this.name = name
 	this.role = role
 }
 
-function UserUpdateData (roomName, username) {
+function UserUpdateData(roomName, username) {
 	this.roomName = roomName
 	this.username = username
 }
@@ -102,8 +102,7 @@ class chatroom {
 		let role = USER_STANDARD
 		if (this.mods.indexOf(accountId) > -1) {
 			role = USER_MOD
-		}
-		else if (this.owners.indexOf(accountId) > -1) {
+		} else if (this.owners.indexOf(accountId) > -1) {
 			role = USER_OWNER
 		}
 		return role
@@ -140,7 +139,7 @@ class chatroom {
 			this.banned.push(accountId)
 		}
 	}
-	
+
 	unbanUser(accountId) {
 		let idx = this.banned.indexOf(accountId)
 		if (idx > -1) {
@@ -169,27 +168,27 @@ function setConnectionHanlders(socket) {
 	logger.info(`${username} [${accountId}] connected to the chat socket`)
 	socket.join('System')
 	socket.emit('rooms list', getRoomList())
-	socket.emit('names list', {names: [username]})
+	socket.emit('names list', { names: [username] })
 	socket.emit('info', createInfoMsg('Welcome to RP Navi!'))
-	socket.broadcast.emit('connected', {name: username})
-	
-	socket.on('disconnect', function(){
+	socket.broadcast.emit('connected', { name: username })
+
+	socket.on('disconnect', function() {
 		handle_Disconnect(socket)
-	});
+	})
 
-	socket.on('chat message', function(data){
+	socket.on('chat message', function(data) {
 		handle_ChatMessage(socket, data)
-	});
+	})
 
-	socket.on('join room', (roomName) => {
+	socket.on('join room', roomName => {
 		handle_JoinRoom(socket, roomName)
 	})
 
-	socket.on('leave room', (roomName) => {
+	socket.on('leave room', roomName => {
 		handle_LeaveRoom(socket, roomName)
 	})
 
-	socket.on('get room info', (roomName) => {
+	socket.on('get room info', roomName => {
 		handle_getRoomInfo(socket, roomName)
 	})
 
@@ -197,9 +196,8 @@ function setConnectionHanlders(socket) {
 		handle_setRoomSettings(socket, roomName, settings)
 	})
 
-	socket.on('mod action', (data) => {
-		handle_ModAction(socket, data)
-		.catch((error) => {
+	socket.on('mod action', data => {
+		handle_ModAction(socket, data).catch(error => {
 			logger.error(error)
 		})
 	})
@@ -207,25 +205,66 @@ function setConnectionHanlders(socket) {
 	/*server.of('/').clients((error, clients) => {
 		console.log(server.sockets.connected[clients[0]].request.session)
 	})*/
-	
 }
 
 /* Utilities *****************************************************************/
 function createRandomRooms() {
 	let words = [
-		'surprise', 'nervous', 'awful', 'drab', 'nasty', 'moaning', 'giraffe', 
-		'tawdry', 'spade', 'pine', 'tense', 'whisper', 'balance', 'need', 
-		'vulgar', 'fierce', 'elbow', 'clear', 'recondite', 'warm', 'shaggy', 
-		'drink', 'point', 'offend', 'launch', 'difficult', 'sweltering', 
-		'confuse', 'nerve', 'puzzled', 'example', 'lettuce', 'peace', 'old', 
-		'pet', 'start', 'shave', 'flaky', 'volleyball', 'quill', 'pushy', 
-		'smell', 'bucket', 'blink', 'panoramic', 'foolish', 'tickle', 
-		'question', 'pause', 'distance'
+		'surprise',
+		'nervous',
+		'awful',
+		'drab',
+		'nasty',
+		'moaning',
+		'giraffe',
+		'tawdry',
+		'spade',
+		'pine',
+		'tense',
+		'whisper',
+		'balance',
+		'need',
+		'vulgar',
+		'fierce',
+		'elbow',
+		'clear',
+		'recondite',
+		'warm',
+		'shaggy',
+		'drink',
+		'point',
+		'offend',
+		'launch',
+		'difficult',
+		'sweltering',
+		'confuse',
+		'nerve',
+		'puzzled',
+		'example',
+		'lettuce',
+		'peace',
+		'old',
+		'pet',
+		'start',
+		'shave',
+		'flaky',
+		'volleyball',
+		'quill',
+		'pushy',
+		'smell',
+		'bucket',
+		'blink',
+		'panoramic',
+		'foolish',
+		'tickle',
+		'question',
+		'pause',
+		'distance'
 	]
 	let roomName = ''
 
-	for(let i = 0; i < 5; i ++) {
-		let numWords = Math.floor(Math.random() * Math.floor(4));
+	for (let i = 0; i < 5; i++) {
+		let numWords = Math.floor(Math.random() * Math.floor(4))
 		roomName += words[Math.floor(Math.random() * Math.floor(words.length))]
 		for (let word = 0; word < numWords; word++) {
 			roomName += ' '
@@ -244,15 +283,14 @@ function createInfoMsg(msg) {
 /* Socket IO handlers ********************************************************/
 function handle_Disconnect(socket) {
 	let username = socket.request.session.username
-	logger.info(`${username} disconnected from the chat`);
-	
-	for(let roomName in chatRooms) {
+	logger.info(`${username} disconnected from the chat`)
+
+	for (let roomName in chatRooms) {
 		let room = chatRooms[roomName]
 		let roomNameKey = roomName.toUpperCase()
 		if (room.users[username]) {
 			handle_LeaveRoom(socket, roomName)
-		}
-		else {
+		} else {
 			socket.leave(roomNameKey)
 		}
 	}
@@ -262,7 +300,11 @@ function handle_ChatMessage(socket, data) {
 	let username = socket.request.session.username
 	let msgData = new MessageData(data.msg, username, data.room)
 	socket.to(msgData.roomName.toUpperCase()).emit('chat message', msgData)
-	logger.debug('%s is sending %s', username, JSON.stringify(msgData, undefined, 4))
+	logger.debug(
+		'%s is sending %s',
+		username,
+		JSON.stringify(msgData, undefined, 4)
+	)
 }
 
 function handle_JoinRoom(socket, roomName) {
@@ -282,26 +324,34 @@ function handle_JoinRoom(socket, roomName) {
 		if (room.banned.indexOf(accountId) > -1) {
 			logger.info(`${username} is banned from ${roomName}`)
 			socket.emit('info', createInfoMsg(`You are banned from ${roomName}`))
-		}
-		else if (!chatRooms[roomNameKey].users[username]){
+		} else if (!chatRooms[roomNameKey].users[username]) {
 			let role = room.getUserRole(accountId)
 			room.addUser(username, role)
 			socket.join(roomNameKey)
-			socket.emit('client joined room', {name: room.name, isMod: (role > USER_STANDARD)})
-			socket.to(roomNameKey).emit('room add user', {roomName: roomName, username: username, role: role})
+			socket.emit('client joined room', {
+				name: room.name,
+				isMod: role > USER_STANDARD
+			})
+			socket.to(roomNameKey).emit('room add user', {
+				roomName: roomName,
+				username: username,
+				role: role
+			})
 			logger.info(`${username} has joined ${roomName} as role ${role}`)
-		}
-		else {
+		} else {
 			socket.emit('info', createInfoMsg(`You are already in ${roomName}`))
 		}
-	}
-	/* Room doesn't exist, creating the room */
-	else {
-		let room = chatRooms[roomNameKey] = new chatroom(roomName, username, accountId)
+	} else {
+		/* Room doesn't exist, creating the room */
+		let room = (chatRooms[roomNameKey] = new chatroom(
+			roomName,
+			username,
+			accountId
+		))
 		logger.info(`${username} is creating ${roomName}`)
 		socket.join(roomNameKey)
-		socket.emit('room created', {name: room.name, isMod: true})
-		server.emit('room list update', {name: roomName, action: ADD_ACTION})
+		socket.emit('room created', { name: room.name, isMod: true })
+		server.emit('room list update', { name: roomName, action: ADD_ACTION })
 		logger.debug('New room createrd: %s', JSON.stringify(room, undefined, 4))
 	}
 }
@@ -324,10 +374,13 @@ function handle_LeaveRoom(socket, roomName) {
 	if (Object.keys(room.users).length === 0 && room.permanent === false) {
 		logger.info(`Removing temporary room: ${roomName}`)
 		delete chatRooms[roomNameKey]
-		server.emit('room list update', {name: roomName, action: DEL_ACTION})
+		server.emit('room list update', { name: roomName, action: DEL_ACTION })
 	}
 	socket.emit('client left room', roomName)
-	socket.broadcast.emit('room remove user', {roomName: roomName, username: username})
+	socket.broadcast.emit('room remove user', {
+		roomName: roomName,
+		username: username
+	})
 }
 
 function handle_getRoomInfo(socket, roomName) {
@@ -335,10 +388,12 @@ function handle_getRoomInfo(socket, roomName) {
 	let roomNameKey = roomName.toUpperCase()
 	let room = chatRooms[roomNameKey]
 
-	logger.info(`${socket.request.session.username} is requesting info for ${roomName}`)
+	logger.info(
+		`${socket.request.session.username} is requesting info for ${roomName}`
+	)
 
 	if (room && room.isBanned(accountId)) {
-		let data = {name: roomName, users: room.users}
+		let data = { name: roomName, users: room.users }
 		let role = room.getUserRole(accountId)
 		if (role > USER_STANDARD) {
 			data.password = room.password
@@ -383,18 +438,16 @@ async function handle_ModAction(socket, data) {
 	if (!data.targetName) {
 		logger.debug(`${modName} did not enter a target name`)
 		return
-	}
-	else if (!roomData) {
+	} else if (!roomData) {
 		logger.debug(`${modName} chose a room that doesn't exist: ${data.room}`)
 		return
-	}
-	else if (roomData.getUserRole(modAcctId) < USER_MOD) {
+	} else if (roomData.getUserRole(modAcctId) < USER_MOD) {
 		logger.debug(`${modName} is not a mod of ${data.room}`)
 		return
 	}
 
 	/* Fill in the target's data (account ID and name) */
-	let accountData  = await accountsDb.getAccountData(data.targetName, ['_id'])
+	let accountData = await accountsDb.getAccountData(data.targetName, ['_id'])
 
 	if (accountData.status !== SUCCESS) {
 		logger.debug(`Could not find ${data.targetName} in the database`)
@@ -409,13 +462,15 @@ async function handle_ModAction(socket, data) {
 	let canDoAction = false
 	switch (data.action) {
 		case 'kick':
-			canDoAction = roomData.getUserRole(modAcctId) >= roomData.getUserRole(targetData.id)
+			canDoAction =
+				roomData.getUserRole(modAcctId) >= roomData.getUserRole(targetData.id)
 			break
 		case 'mod':
 		case 'ban':
 		case 'unmod':
 		case 'unban':
-			canDoAction = roomData.getUserRole(modAcctId) > roomData.getUserRole(targetData.id)
+			canDoAction =
+				roomData.getUserRole(modAcctId) > roomData.getUserRole(targetData.id)
 			break
 		default:
 			break
@@ -433,24 +488,20 @@ async function handle_ModAction(socket, data) {
 		roomSignal = 'room kick user'
 		clientSignal = 'client kicked'
 		logger.info(`${modName} is kicking ${targetData.name} from ${data.room}`)
-	}
-	else if (data.action === 'mod') {
+	} else if (data.action === 'mod') {
 		roomSignal = 'room add mod'
 		roomData.addMod(targetData.id)
 		logger.info(`${modName} is modding ${targetData.name} in ${data.room}`)
-	}
-	else if (data.action === 'unmod') {
+	} else if (data.action === 'unmod') {
 		roomSignal = 'room remove mod'
 		roomData.removeMod(targetData.id)
 		logger.info(`${modName} is unmodding ${targetData.name} in ${data.room}`)
-	}
-	else if (data.action === 'ban') {
+	} else if (data.action === 'ban') {
 		roomSignal = 'room ban user'
 		clientSignal = 'client banned'
 		roomData.banUser(targetData.id)
 		logger.info(`${modName} is banning ${targetData.name} in ${data.room}`)
-	}
-	else if (data.action === 'unban') {
+	} else if (data.action === 'unban') {
 		roomData.unbanUser(targetData.id)
 		logger.info(`${modName} is unbanning ${targetData.name} in ${data.room}`)
 	}
@@ -458,27 +509,36 @@ async function handle_ModAction(socket, data) {
 	if (clientSignal !== '') {
 		removeUserFromRoom(targetData.id, roomData, clientSignal)
 	}
-	
-	server.in(roomNameKey).emit(roomSignal, new UserUpdateData(data.room, targetData.name))
+
+	server
+		.in(roomNameKey)
+		.emit(roomSignal, new UserUpdateData(data.room, targetData.name))
 }
 
 function removeUserFromRoom(targetAcctId, roomData, signal) {
 	let roomNameKey = roomData.name.toUpperCase()
-	server.of('/').in(roomNameKey).clients((error, clients) => {
-		if (error) {
-			logger.error('There was an error getting clients from %s: %s', roomData.name, error)
-			return
-		}
-		clients.forEach((clientId) => {
-			let targetData = server.sockets.connected[clientId].request.session
-			if (targetData.account != targetAcctId) {
+	server
+		.of('/')
+		.in(roomNameKey)
+		.clients((error, clients) => {
+			if (error) {
+				logger.error(
+					'There was an error getting clients from %s: %s',
+					roomData.name,
+					error
+				)
 				return
 			}
-			logger.info(`${targetData.username} is being removed from ${roomData}`)
-			roomData.removeUser(targetData.username)
-			server.to(clientId).emit(signal)
-		});
-	})
+			clients.forEach(clientId => {
+				let targetData = server.sockets.connected[clientId].request.session
+				if (targetData.account != targetAcctId) {
+					return
+				}
+				logger.info(`${targetData.username} is being removed from ${roomData}`)
+				roomData.removeUser(targetData.username)
+				server.to(clientId).emit(signal)
+			})
+		})
 }
 
 exports.setConnectionHanlders = setConnectionHanlders

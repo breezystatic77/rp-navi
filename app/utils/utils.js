@@ -1,5 +1,5 @@
 /**
- * Contains utility functions and other tools that are used by various 
+ * Contains utility functions and other tools that are used by various
  * portions of the server.
  */
 
@@ -8,20 +8,20 @@
  */
 
 const { createLogger, format, transports } = require('winston')
-const { combine, timestamp, colorize, splat, printf} = format
+const { combine, timestamp, colorize, splat, printf } = format
 
 let logger = createLogger({
 	level: getEnvironment(),
 	format: combine(
 		colorize(),
 		timestamp({
-		  format: 'YYYY-MM-DD HH:mm:ss'
+			format: 'YYYY-MM-DD HH:mm:ss'
 		}),
 		splat(),
 		printf(info => `${info.timestamp} ${info.level}: ${info.message}`)
 	),
 	transports: [
-		new transports.Console(),
+		new transports.Console()
 		/*new transports.File({
 			filename: 'server-combined.log',
 			level: 'info',
@@ -35,17 +35,17 @@ let logger = createLogger({
 	]
 })
 
-let httpLogger = createLogger ({
+let httpLogger = createLogger({
 	level: getEnvironment(),
 	format: combine(
 		timestamp({
-		  format: 'YYYY-MM-DD HH:mm:ss'
+			format: 'YYYY-MM-DD HH:mm:ss'
 		}),
 		splat(),
 		printf(info => `${info.timestamp}: ${info.message}`)
 	),
 	transports: [
-		new transports.Console(),
+		new transports.Console()
 		/*new transports.File({
 			filename: 'http-combined.log',
 			level: 'info',
@@ -59,9 +59,11 @@ let httpLogger = createLogger ({
 	]
 })
 
-httpLogger.stream = {write: (message, encoding) => {
-	httpLogger.info(message)
-}}
+httpLogger.stream = {
+	write: (message, encoding) => {
+		httpLogger.info(message)
+	}
+}
 
 /**
  * Get the environment this module is running under.
@@ -69,11 +71,9 @@ httpLogger.stream = {write: (message, encoding) => {
 function getEnvironment() {
 	if (process.env.NODE_ENV === 'development') {
 		return 'debug'
-	}
-	else if (process.env.NODE_ENV === 'verbose') {
+	} else if (process.env.NODE_ENV === 'verbose') {
 		return 'verbose'
-	}
-	else {
+	} else {
 		return 'info'
 	}
 }
