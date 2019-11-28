@@ -7,7 +7,7 @@
 const mongoose = require('mongoose')
 require('../model/account-schema.js')
 require('../model/reset-pw-schema.js')
-const accountCtrl = require('../model/accounts')
+const accountCtrl = require('../models/accounts')
 const logger = require('../common/utils').logger
 
 mongoose.connect('mongodb://127.0.0.1/rpn_db')

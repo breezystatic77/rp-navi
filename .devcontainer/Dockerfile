@@ -34,7 +34,7 @@ RUN apt-get update \
     && apt-get -y install --no-install-recommends yarn \
     #
     # Install eslint globally
-    && npm install -g eslint \
+    && npm install -g eslint jest \
     #
     # [Optional] Update a non-root user to match UID/GID - see https://aka.ms/vscode-remote/containers/non-root-user.
     && if [ "$USER_GID" != "1000" ]; then groupmod node --gid $USER_GID; fi \

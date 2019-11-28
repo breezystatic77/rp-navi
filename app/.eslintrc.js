@@ -5,7 +5,8 @@ module.exports = {
 		es6: true,
 		node: true
 	},
-	extends: 'eslint:recommended',
+	plugins: ['jest'],
+	extends: ['eslint:recommended', 'plugin:jest/recommended'],
 	globals: {
 		Atomics: 'readonly',
 		SharedArrayBuffer: 'readonly'
@@ -13,5 +14,7 @@ module.exports = {
 	parserOptions: {
 		ecmaVersion: 2018
 	},
-	rules: {}
+	rules: {
+		'no-unused-vars': 'warn'
+	}
 }
