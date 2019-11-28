@@ -1,9 +1,0 @@
-{
-	"folders": [{
-		"path": "./app",
-		"name": "App"
-	}, {
-		"path": ".",
-		"name": "Workspace Root"
-	}]
-}
