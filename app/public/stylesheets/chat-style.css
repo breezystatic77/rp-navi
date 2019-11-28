@@ -1,0 +1,49 @@
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+html, body, .chat-container {
+	height: 100%;
+}
+
+input#m {
+	padding: 10px;
+	width: 100%;
+	margin-right: .5%;
+}
+
+.chat-content { 
+	height: calc(100% - 48px)
+}
+
+#room-options-card {
+	display: none;
+}
+
+.room-users li {
+	list-style-type: none;
+}
+
+#messages {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
+#messages li {
+	padding: 5px 10px;
+}
+
+#messages li:nth-child(odd) {
+	background: #eee;
+}
+
+.chat-input {
+	height: 48px;
+}
+
+input#m {
+	margin-top: 5px;
+}

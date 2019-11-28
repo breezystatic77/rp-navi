@@ -1,0 +1,51 @@
+doctype html
+html
+	head
+		title RP Navi Chat Page
+		script(src='/socket.io/socket.io.js')
+		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		script(src='/javascripts/chat.js')
+		link(rel='stylesheet', href='/stylesheets/chat-style.css')
+
+	body
+		div.container-fluid.chat-container
+			div.row.chat-content
+				div.col-lg-8(style="border-right: solid 2px lightgray; border-bottom: solid 2px lightgray;")
+					ul#messages
+				div.col-lg-4(style="background: #ADF;")
+					div#room-list-card.card
+						div.card-body
+							h6.card-subtitle.mb-2 Room select
+							div.dropdown
+								button.btn.btn-secondary.dropdown-toggle(type="button" id="roomListDropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false")
+									| Select Room
+								div.dropdown-menu.room-list(aria-labelledby="roomListDropDown")
+							br
+							h6.card-subtitle.mb-2 Create/Join room
+							input#join-room.form-control(type="text", placeholder="Join room...")
+					div#room-stats-card.card
+						div.card-body
+							div.dropdown
+								button#joinedRooms.btn.btn-secondary.dropdown-toggle(type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false")
+									| [Current room]
+								div.dropdown-menu.joinedRooms(aria-labelledby="joinedRooms")
+							br
+							p.current-room-users
+								ul.room-users
+							button.btn.btn-danger(type="button" id="leaveRoomBtn")
+								| Leave room
+					div#room-options-card.card
+						div.card-body
+							h6.card-subtitle.mb-2 Room options
+							div.form-group
+								label(for="room-password") Password
+								input#room-password.form-control(type="text", placeholder="Password")
+							div.form-group.form-check
+								input#exampleCheck1.form-check-input(type="checkbox")
+								label.form-check-label(for="exampleCheck1") Check me out
+			div.row
+				div.col.chat-input(style="background: #AFD;")
+					input#m.form-control(type="text", placeholder="Type something here...")

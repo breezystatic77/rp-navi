@@ -1,6 +1,6 @@
 /* @file
-    Provides utilities for cryptography functions like hashing or one-time key 
-    generation.
+	Provides utilities for cryptography functions like hashing or one-time key 
+	generation.
 */
 
 /**
@@ -11,12 +11,12 @@
  * @returns {string} A base 64 string of the hash that was generated.
  */
 function generateKey() {
-    const crypto = require('crypto')
-    var rand = crypto.randomBytes(32)
-    var hash = crypto.createHash('sha256')
-    hash.update(new Date().toString() + rand.toString())
+	const crypto = require('crypto')
+	var rand = crypto.randomBytes(32)
+	var hash = crypto.createHash('sha256')
+	hash.update(new Date().toString() + rand.toString())
 
-    return hash.digest().toString('base64')
+	return hash.digest().toString('base64')
 }
 
 /**
@@ -26,12 +26,12 @@ function generateKey() {
  * @returns A promise of some hashing function to be handled by the caller.
  */
 function getPasswordHash(password, salt) {
-    const crypto = require('crypto')
-    const argon2 = require('argon2')
+	const crypto = require('crypto')
+	const argon2 = require('argon2')
 
-    var hash = crypto.createHash('sha512')
-    hash.update(password)
-    return argon2.hash(hash.digest().toString('base64'), salt)
+	var hash = crypto.createHash('sha512')
+	hash.update(password)
+	return argon2.hash(hash.digest().toString('base64'), salt)
 }
 
 /**
@@ -41,12 +41,12 @@ function getPasswordHash(password, salt) {
  * @returns A promise of some hashing function to be handled by the caller.
  */
 function verifyPassword(passwordHash, password) {
-    const crypto = require('crypto')
-    const argon2 = require('argon2')
+	const crypto = require('crypto')
+	const argon2 = require('argon2')
 
-    var hash = crypto.createHash('sha512')
-    hash.update(password)
-    return argon2.verify(passwordHash, hash.digest().toString('base64'))
+	var hash = crypto.createHash('sha512')
+	hash.update(password)
+	return argon2.verify(passwordHash, hash.digest().toString('base64'))
 }
 
 /*****************************************************************************

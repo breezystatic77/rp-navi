@@ -3,10 +3,10 @@ extends ../layout
 block content
   h1= title
   form.form-style(action="/login", method="post")
-    fieldset
-        legend Login
-        input.common-input(type="text", name="username", placeholder="Username")
-        input.common-input(type="password", name="password", placeholder="Password")
-        button Login
+	fieldset
+		legend Login
+		input.common-input(type="text", name="username", placeholder="Username")
+		input.common-input(type="password", name="password", placeholder="Password")
+		button Login
   br
   p #{message}

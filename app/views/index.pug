@@ -1,24 +1,24 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
-  form.form-style(action="/signup", method="post")
-    fieldset
-        legend Create account
-        input.captioned-input(type="text", name="username", placeholder="Username")
-        p.input-label Must be at least 5 characters
-        input.common-input(type="email", name="email", placeholder="Email address")
-        input.captioned-input(type="password", name="password", placeholder="Password")
-        p.input-label Must be at least 4 characters
-        button Signup
-  br
-  form.form-style(action="/login", method="post")
-    fieldset
-        legend Login
-        input.common-input(type="text", name="username", placeholder="Username")
-        input.common-input(type="password", name="password", placeholder="Password")
-        a(href='/user/forgotPassword') Forgot password?
-        button Login
-  br
-  p #{message}
+	h1= title
+	p Welcome to #{title}
+	form.form-style(action="/signup", method="post")
+	fieldset
+		legend Create account
+		input.captioned-input(type="text", name="username", placeholder="Username")
+		p.input-label Must be at least 5 characters
+		input.common-input(type="email", name="email", placeholder="Email address")
+		input.captioned-input(type="password", name="password", placeholder="Password")
+		p.input-label Must be at least 4 characters
+		button Signup
+	br
+	form.form-style(action="/login", method="post")
+	fieldset
+		legend Login
+		input.common-input(type="text", name="username", placeholder="Username")
+		input.common-input(type="password", name="password", placeholder="Password")
+		a(href='/user/forgotPassword') Forgot password?
+		button Login
+	br
+	p #{message}
