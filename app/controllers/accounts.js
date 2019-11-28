@@ -229,18 +229,18 @@ function updateAccountState(req, res) {
 		.catch(sendError)
 }
 
-exports.signup = signup
-exports.login = login
+module.exports = {
+	signup,
+	login,
+	getAccountData,
+	searchAccountData,
 
-exports.getAccountData = getAccountData
-exports.searchAccountData = searchAccountData
-
-exports.verifyAccount = verifyAccount
-exports.updateEmail = updateEmail
-exports.updatePassword = updatePassword
-exports.requestPwReset = requestPwReset
-exports.verifyPasswordReset = verifyPasswordReset
-exports.resetPassword = resetPassword
-exports.disableAccount = disableAccount
-
-exports.updateAccountState = updateAccountState
+	verifyAccount,
+	updateEmail,
+	updatePassword,
+	requestPwReset,
+	verifyPasswordReset,
+	resetPassword,
+	disableAccount,
+	updateAccountState,
+}
