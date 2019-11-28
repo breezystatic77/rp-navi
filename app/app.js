@@ -1,15 +1,15 @@
+/** Get dotenv settings */
+
+require('dotenv-flow').config()
+
 /* Grab all dependencies *****************************************************/
 var createError = require('http-errors')
-var dotenv = require('dotenv')
 var express = require('express')
 var session = require('express-session')
 var cookieSession = require('cookie-session')
 var path = require('path')
 var cookieParser = require('cookie-parser')
 var morgan = require('morgan')
-
-/* Get environment settings **************************************************/
-dotenv.config()
 
 /* Setup dependencies ********************************************************/
 const logger = require('./utils/utils').logger
@@ -20,7 +20,7 @@ logger.info('Running server with environment %s', process.env.NODE_ENV)
 if (process.env.DB_TYPE === 'mongodb') {
 	const mongoose = require('mongoose')
 	mongoose.set('useCreateIndex', true)
-	mongoose.connect('mongodb://127.0.0.1/rpn_db', {
+	mongoose.connect(process.env.DB_URL, {
 		useNewUrlParser: true
 	})
 	require('./models/account-schema.js')
@@ -36,7 +36,7 @@ var sessionMiddleware = cookieSession({
 	name: process.env.COOKIE_NAME,
 	secret: process.env.COOKIE_SECRET,
 	maxAge: process.env.COOKIE_TTL_DEV
-  })
+})
 
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'pug')

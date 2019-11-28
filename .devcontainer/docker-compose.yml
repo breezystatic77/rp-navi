@@ -20,6 +20,10 @@ services:
 
     # Overrides default command so things don't shut down after the process ends.
     command: sleep infinity
+
+    ports:
+      - "4000:4000"
+      - "4001:4001"
     
     links:
       - mongo
