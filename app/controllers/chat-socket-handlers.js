@@ -1,11 +1,10 @@
-const promisify = require('util').promisify
 const accountsDb = require('../models/accounts')
 const logger = require('../utils/utils').logger
 const SUCCESS = require('../utils/reason-codes').genericCodes.SUCCESS
+const chatroom = require('../models/chatroom').chatroom
 
 const DEL_ACTION = 0
 const ADD_ACTION = 1
-const SYSTEM_ROOM_NAME = 'system'
 
 /* User roles */
 const USER_REMOVED = -99
@@ -15,43 +14,11 @@ const USER_OWNER = 2
 
 let server = null
 
-/*  Signals supported
- * -- To Client --
- * info                         Information from the server
- * rooms list                   List of rooms
- * names list                   List of names the account owns
- * chat message                 Chat message to clients
- * client joined room           Telling the client they joined a room
- * client left room             Telling the client they left a room
- * client kicked                Telling the client they were kicked
- * client banned                Telling the client they were banned
- * room add user                Another client joined the room
- * room remove user             Another client left the room
- * room kick user               Another client was kicked from the room
- * room created                 The client created a room
- * room list update             Update the room list
- * room info                    Information about a room
- * room add mod                 A mod was added to the room
- * room remove mod              A mod was removed from the room
- * room ban user                A user was banned
- * room unban user              A user was unbanned
- * room settings updated        A mod updated the room options
- *
- * -- From Client --
- * disconnect                   Client disconnected
- * chat message                 Client sent a message for a chat room
- * join room                    Client wants to join a room
- * leave room                   Client wants to leave a room
- * get room info                Client wants information from a room
- * set room settings            Client is changing a room's settings
- * mod action                   Client is performing a mod action
- */
-
 /* Data Structures ***********************************************************/
-function MessageData(msg, username, room) {
+function MessageData(msg, username, roomName) {
 	this.msg = msg
 	this.username = username
-	this.roomName = room
+	this.roomName = roomName
 	this.timestamp = new Date().getTime()
 }
 
@@ -60,101 +27,12 @@ function StatusData(msg) {
 	this.timestamp = new Date().getTime()
 }
 
-function UserData(name, role) {
-	this.name = name
-	this.role = role
-}
-
 function UserUpdateData(roomName, username) {
 	this.roomName = roomName
 	this.username = username
 }
 
-/* Classes *******************************************************************/
-class chatroom {
-	constructor(name, ownerName, ownerId) {
-		this.name = name
-		this.users = {}
-		this.mods = []
-		this.owners = []
-		this.banned = []
-		this.password = ''
-		this.private = false
-		this.permanent = false
-
-		this.users[ownerName] = new UserData(ownerName, USER_OWNER)
-		this.owners.push(ownerId)
-	}
-
-	addUser(userName, role) {
-		if (!this.users[userName]) {
-			this.users[userName] = new UserData(userName, role)
-		}
-	}
-
-	removeUser(userName) {
-		if (this.users[userName]) {
-			delete this.users[userName]
-		}
-	}
-
-	getUserRole(accountId) {
-		let role = USER_STANDARD
-		if (this.mods.indexOf(accountId) > -1) {
-			role = USER_MOD
-		} else if (this.owners.indexOf(accountId) > -1) {
-			role = USER_OWNER
-		}
-		return role
-	}
-
-	addMod(accountId) {
-		if (this.mods.indexOf(accountId) === -1) {
-			this.mods.push(accountId)
-		}
-	}
-
-	removeMod(accountId) {
-		let modIdx = this.mods.indexOf(accountId)
-		if (modIdx > -1) {
-			this.mods.splice(modIdx, 1)
-		}
-	}
-
-	addOwner(accountId) {
-		if (this.owners.indexOf(accountId) === -1) {
-			this.owners.push(accountId)
-		}
-	}
-
-	removeOwner(accountId) {
-		let ownerIdx = this.owners.indexOf(accountId)
-		if (ownerIdx > -1) {
-			this.owners.splice(ownerIdx, 1)
-		}
-	}
-
-	banUser(accountId) {
-		if (this.banned.indexOf(accountId) === -1) {
-			this.banned.push(accountId)
-		}
-	}
-
-	unbanUser(accountId) {
-		let idx = this.banned.indexOf(accountId)
-		if (idx > -1) {
-			this.banned.splice(idx, 1)
-		}
-	}
-
-	isBanned(accountId) {
-		return this.banned.indexOf(accountId) === -1
-	}
-}
-
 var chatRooms = {}
-
-var connectedUsers = {}
 
 /* Connection setup handlers *************************************************/
 function setConnectionHanlders(socket) {
@@ -170,7 +48,6 @@ function setConnectionHanlders(socket) {
 	socket.emit('rooms list', getRoomList())
 	socket.emit('names list', { names: [username] })
 	socket.emit('info', createInfoMsg('Welcome to RP Navi!'))
-	socket.broadcast.emit('connected', { name: username })
 
 	socket.on('disconnect', function() {
 		handle_Disconnect(socket)
@@ -201,10 +78,6 @@ function setConnectionHanlders(socket) {
 			logger.error(error)
 		})
 	})
-
-	/*server.of('/').clients((error, clients) => {
-		console.log(server.sockets.connected[clients[0]].request.session)
-	})*/
 }
 
 /* Utilities *****************************************************************/
@@ -277,10 +150,30 @@ function createRandomRooms() {
 }
 
 function createInfoMsg(msg) {
-	return new MessageData(msg, 'SYSTEM', SYSTEM_ROOM_NAME)
+	return new StatusData(msg)
+}
+
+/**
+ * Gets a list of rooms
+ * @returns An array containing rooms
+ */
+function getRoomList() {
+	let roomList = []
+	for (let nameKey in chatRooms) {
+		roomList.push(chatRooms[nameKey].name)
+	}
+	return roomList
+}
+
+function setIoServer(io) {
+	server = io
 }
 
 /* Socket IO handlers ********************************************************/
+/**
+ * Handles when a client disconnects from the server
+ * @param {*} socket 
+ */
 function handle_Disconnect(socket) {
 	let username = socket.request.session.username
 	logger.info(`${username} disconnected from the chat`)
@@ -296,21 +189,30 @@ function handle_Disconnect(socket) {
 	}
 }
 
+/**
+ * Handles when a client sends a chat message
+ * @param {*} socket 
+ * @param {*} data 
+ */
 function handle_ChatMessage(socket, data) {
 	let username = socket.request.session.username
 	let msgData = new MessageData(data.msg, username, data.room)
 	socket.to(msgData.roomName.toUpperCase()).emit('chat message', msgData)
-	logger.debug(
-		'%s is sending %s',
-		username,
-		JSON.stringify(msgData, undefined, 4)
+	logger.debug(`${username} is sending ${JSON.stringify(msgData, undefined, 4)}`,
 	)
 }
 
-function handle_JoinRoom(socket, roomName) {
+/**
+ * Handles when a client wants to join a room. This can create rooms if the
+ * room doesn't exist.
+ * @param {*} socket 
+ * @param {*} data 
+ */
+function handle_JoinRoom(socket, data) {
 	let username = socket.request.session.username
 	let accountId = socket.request.session.account
-	let roomNameKey = roomName.toUpperCase()
+	let roomNameKey = data.roomName.toUpperCase()
+	let roomName = data.roomName
 
 	if (!roomName) {
 		socket.emit('info', createInfoMsg('A room name was not entered'))
@@ -350,15 +252,20 @@ function handle_JoinRoom(socket, roomName) {
 		))
 		logger.info(`${username} is creating ${roomName}`)
 		socket.join(roomNameKey)
-		socket.emit('room created', { name: room.name, isMod: true })
-		server.emit('room list update', { name: roomName, action: ADD_ACTION })
+		socket.emit('room created', { roomName: room.name, isMod: true })
+		server.emit('room list update', { roomName: roomName, action: ADD_ACTION })
 		logger.debug('New room createrd: %s', JSON.stringify(room, undefined, 4))
 	}
 }
 
-function handle_LeaveRoom(socket, roomName) {
+/**
+ * Handles when a client wants to leave a room
+ * @param {*} socket 
+ * @param {*} data 
+ */
+function handle_LeaveRoom(socket, data) {
 	let username = socket.request.session.username
-	let roomNameKey = roomName.toUpperCase()
+	let roomNameKey = data.roomName.toUpperCase()
 	let room = chatRooms[roomNameKey]
 
 	if (!room) {
@@ -367,7 +274,6 @@ function handle_LeaveRoom(socket, roomName) {
 	}
 
 	logger.info(`${username} is leaving ${roomName}`)
-
 	room.removeUser(username)
 	socket.leave(roomNameKey)
 
@@ -383,6 +289,11 @@ function handle_LeaveRoom(socket, roomName) {
 	})
 }
 
+/**
+ * Handles when a client wants to get information on a room
+ * @param {*} socket 
+ * @param {*} roomName 
+ */
 function handle_getRoomInfo(socket, roomName) {
 	let accountId = socket.request.session.account
 	let roomNameKey = roomName.toUpperCase()
@@ -402,6 +313,12 @@ function handle_getRoomInfo(socket, roomName) {
 	}
 }
 
+/**
+ * Handles when a client wants to change a room's settings.
+ * @param {*} socket 
+ * @param {*} roomName 
+ * @param {*} settings 
+ */
 function handle_setRoomSettings(socket, roomName, settings) {
 	let modAcctId = socket.request.session.account
 	let roomNameKey = roomName.toUpperCase()
@@ -418,16 +335,13 @@ function handle_setRoomSettings(socket, roomName, settings) {
 	}
 }
 
-function getRoomList() {
-	let roomList = []
-	for (let nameKey in chatRooms) {
-		roomList.push(chatRooms[nameKey].name)
-	}
-	return roomList
-}
-
 /* Modding action handlers ***************************************************/
-
+/**
+ * Handles performing a modding action. Function is async because it needs to
+ * access the DB.
+ * @param {*} socket 
+ * @param {*} data 
+ */
 async function handle_ModAction(socket, data) {
 	let roomNameKey = data.room.toUpperCase()
 	let modName = socket.request.session.username
@@ -515,6 +429,12 @@ async function handle_ModAction(socket, data) {
 		.emit(roomSignal, new UserUpdateData(data.room, targetData.name))
 }
 
+/**
+ * Removes a user from a room (kick/ban)
+ * @param {*} targetAcctId - Targets account ID
+ * @param {*} roomData - Object containing information about the room
+ * @param {*} signal - What SocketIO signal to use
+ */
 function removeUserFromRoom(targetAcctId, roomData, signal) {
 	let roomNameKey = roomData.name.toUpperCase()
 	server
@@ -541,9 +461,9 @@ function removeUserFromRoom(targetAcctId, roomData, signal) {
 		})
 }
 
-exports.setConnectionHanlders = setConnectionHanlders
-exports.createRandomRooms = createRandomRooms
-
-exports.setIoServer = function(io) {
-	server = io
+/* Module exports ************************************************************/
+module.exports = {
+	setConnectionHanlders,
+	createRandomRooms,
+	setIoServer
 }

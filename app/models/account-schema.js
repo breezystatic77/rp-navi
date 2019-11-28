@@ -37,4 +37,6 @@ var accountSchema = new mongoose.Schema({
 
 mongoose.model('Account', accountSchema)
 
-exports.accountStates = accountStates
+module.exports = {
+	accountStates
+}
