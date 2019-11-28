@@ -1,4 +1,7 @@
-const { MongoClient, Db } = require('mongodb')
+const mongoose = require('mongoose')
+const { MongoMemoryServer } = require('mongodb-memory-server')
+
+require('./account-schema')
 
 const {
 	createAccount,
@@ -21,16 +24,34 @@ const NEW_PASSWORD = '123456'
 const SUCCESS = require('../utils/reason-codes').genericCodes.SUCCESS
 const FAILURE = require('../utils/reason-codes').genericCodes.FAILURE
 
-/** @type {import('mongodb').MongoClient} */
-let connection
-/** @type {import('mongodb').Db} */
-let db
+let mongod
 
 beforeAll(async () => {
-	connection = await MongoClient.connect(global.__MONGO_URI__, {
-		useNewUrlParser: true
+	mongod = new MongoMemoryServer()
+	const connectionString = await mongod.getConnectionString()
+
+	await mongoose.connect(connectionString, {
+		useUnifiedTopology: true,
+		useNewUrlParser: true,
+		useCreateIndex: true,
+		useFindAndModify: true
 	})
-	db = await connection.db(global.__MONGO_DB_NAME__)
+})
+
+afterAll(async () => {
+	await mongoose.disconnect()
+	await mongod.stop()
+})
+
+let userAccount
+
+beforeEach(async () => {
+	const { account } = await createAccount(USERNAME, PASSWORD, EMAIL)
+	userAccount = account
+})
+
+afterEach(async () => {
+	await mongoose.connection.db.dropDatabase()
 })
 
 it('runs jest', () => {
@@ -38,5 +59,30 @@ it('runs jest', () => {
 })
 
 it('createAccount()', async () => {
-	const { status, account } = await createAccount(USERNAME, PASSWORD, EMAIL)
+	const { status } = await createAccount('person12345', PASSWORD, EMAIL)
+	expect(status).toBe(SUCCESS)
 })
+
+it.skip('verifyAccount()', async () => {})
+
+it('verifyPassword()', async () => {
+	const { status } = await verifyPassword(USERNAME, PASSWORD)
+	expect(status).toBe(SUCCESS)
+})
+
+it('updateEmail()', async () => {
+	const { status } = await updateEmail(USERNAME, 'new_email_123@gmail.gov')
+	expect(status).toBe(SUCCESS)
+})
+
+// TODO getAccountData unit test
+it.skip('getAccountData()', async () => {})
+
+// TODO updatePassword unit test
+it.skip('updatePassword()', async () => {})
+
+// TODO requestPwReset unit test
+it.skip('requestPwReset()', async () => {})
+
+// TODO deactivateAccount unit test
+it.skip('deactivateAccount()', async () => {})
